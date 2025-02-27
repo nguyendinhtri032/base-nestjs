@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+if [ $# -gt 0 ]; then
+    exec gosu $UGNAME "$@"
+else
+    exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
+fi

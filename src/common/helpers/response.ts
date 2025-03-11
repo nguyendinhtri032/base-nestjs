@@ -16,20 +16,3 @@ export function ResponseSuccess(
         message
     })
 }
-
-
-export function ResponseForbidden(
-    res: FastifyReply,
-    message: string = null,
-    data: any = null
-) {
-    if (data !== null) {
-        return res.status(HttpStatus.FORBIDDEN).send({
-            data
-        })
-    }
-
-    return res.status(HttpStatus.FORBIDDEN).send({
-        message
-    })
-}

@@ -11,15 +11,16 @@ import { CommandFactory } from 'nest-commander'
 dotenv.config()
 
 async function bootstrap() {
-  const args = process.argv.slice(2);
+  const args = process.argv.slice(2)
 
   if (args.length > 0) {
     await CommandFactory.run(AppModule, {
       logger: console,
-    });
+    })
   }
   else {
     const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter())
+
     app.enableCors({ credentials: true, origin: '*' })
 
     app.useGlobalPipes(
@@ -42,15 +43,10 @@ async function bootstrap() {
 
     app.useGlobalFilters(new HandleExceptionFilter())
 
-    // Log the adapter
-    const adapter = app.getHttpAdapter()
-    console.log(
-      `HTTP Adapter: ${adapter.constructor.name
-      }, Using Fastify: ${adapter instanceof FastifyAdapter}`,
-    )
     await app.register(fastifyMultipart as any)
 
     await app.listen(SERVER_CONFIG.APP_PORT, '0.0.0.0')
+
     console.log(`Application is running on: ${await app.getUrl()}`)
   }
 }

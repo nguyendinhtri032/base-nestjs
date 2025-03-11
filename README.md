@@ -24,7 +24,8 @@ Follow these steps to set up **Huca API** on your system:
 4. **Launch the App**:
    - For development: `npm run start:dev`
    - For production: `npm run start:prod`
-
+5. **Make Migration**
+   - npm run migration:create --name=migrationName
 ## License
 
 **Huca API** is not open-sourced.

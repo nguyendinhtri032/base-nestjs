@@ -16,7 +16,7 @@ export class DeleteAllUserCommand extends CommandRunner {
   async run(): Promise<void> {
     this.logger.log('Bắt đầu xóa tất cả người dùng Firebase...')
     try {
-      await this.firebaseService.deleteAllUser()
+      await this.firebaseService.deleteAllUserFirebase()
       this.logger.log('Tất cả người dùng Firebase đã được xóa thành công.')
       process.exit(0)
     } catch (error) {

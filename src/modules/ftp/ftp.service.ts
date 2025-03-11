@@ -19,9 +19,9 @@ export class FtpService {
 
   private async connectToFtp() {
     await this.ftpClient.access({
-      host: SERVER_CONFIG.FTP_HOST,
-      user: SERVER_CONFIG.FTP_USERNAME,
-      password: SERVER_CONFIG.FTP_PASSWORD,
+      host: SERVER_CONFIG.FTP.HOST,
+      user: SERVER_CONFIG.FTP.USERNAME,
+      password: SERVER_CONFIG.FTP.PASSWORD,
       secure: false,
       secureOptions: {
         timeout: 20000,
@@ -58,6 +58,6 @@ export class FtpService {
     return this.ftpClient.close()
   }
   getFullPath(path: string) {
-    return `${SERVER_CONFIG.FTP_HOST}${path}`
+    return `${SERVER_CONFIG.FTP.HOST}${path}`
   }
 }

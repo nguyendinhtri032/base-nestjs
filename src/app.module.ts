@@ -1,45 +1,43 @@
 import { Module } from '@nestjs/common'
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
-import { AuthModule } from './modules/auth/auth.module'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { UserModule } from './modules/user/user.module'
 import { AppDataSource } from './configs/orm.config'
 import { ConfigModule } from '@nestjs/config'
 import { FirebaseModule } from './modules/firebase/firebase.module'
-import { AuthService } from './modules/auth/auth.service'
-import { FirebaseService } from './modules/firebase/firebase.service'
 import { FtpModule } from './modules/ftp/ftp.module'
-import { TelegramLoggerService } from './modules/logger/telegram-logger.service'
-import { HandleExceptionFilter } from './exception/handle-exception.filter'
-import { APP_FILTER } from '@nestjs/core'
-import { DeleteAllUserCommand } from './modules/firebase/command/delete-all-user.command'
-
+import { ScheduleModule } from '@nestjs/schedule'
+import { QueueModule } from './modules/queue/queue.module'
+import { RedisModule } from './modules/redis/redis.module' 
+import { EventEmitterModule } from '@nestjs/event-emitter'
+import { CaslModule } from './modules/casl/casl.module'
+import { S3ManagerModule } from './modules/aws/s3-manager.module'
 @Module({
   imports: [
     TypeOrmModule.forRoot({
       ...AppDataSource.options,
-      autoLoadEntities: true,
+      autoLoadEntities: true
     }),
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    AuthModule,
+    EventEmitterModule.forRoot(),
     UserModule,
     FirebaseModule,
     FtpModule,
+    ScheduleModule.forRoot(),
+    QueueModule,
+    RedisModule,
+    CaslModule,
+
+    S3ManagerModule
   ],
   controllers: [AppController],
   providers: [
     AppService,
-    AuthService,
-    FirebaseService,
-    TelegramLoggerService,
-    {
-      provide: APP_FILTER,
-      useClass: HandleExceptionFilter,
-    },
-    DeleteAllUserCommand,
   ],
+  exports: [
+  ]
 })
 export class AppModule {}

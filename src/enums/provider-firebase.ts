@@ -1,4 +1,4 @@
-export enum Provider {
+export enum ProviderFirebase {
   EMAIL = 'email',
   PHONE_NUMBER = 'phoneNumber',
 }

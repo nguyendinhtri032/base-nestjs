@@ -9,6 +9,9 @@ import {
   Req,
   UnauthorizedException,
   NotFoundException,
+  UseInterceptors,
+  Query,
+  Param,
 } from '@nestjs/common'
 import {
   ApiTags,
@@ -25,15 +28,22 @@ import { ResponseSuccess } from 'src/common/helpers/response'
 import { SERVER_CONFIG } from 'src/configs/server.config'
 import { CurrentUser } from 'src/common/decorators/current-user.decorator'
 import { UserResponseDto } from './dtos/user-response.dto'
-import { AuthService } from '../auth/auth.service'
 import { UpdateDeviceIdDto } from './dtos/update-device-id.dto'
+import { QueueService } from '../queue/queue.service'
+import { CacheInterceptor, CacheKey, CacheTTL } from '@nestjs/cache-manager'
+import { ApiPaginationQuery, PaginateQuery } from 'nestjs-paginate'
+import { PaginationQueryDto } from './dtos/pagination-query.dto'
+import { CheckAbilities } from 'src/common/decorators/check-abilities.decorator'
+import { Action } from "src/enums/action"
+import { AbilitiesGuard } from '../casl/abilities.guard'
 @ApiTags('User')
+
 @Controller(`${SERVER_CONFIG.API_PREFIX_V1}/user`)
 export class UserController {
   constructor(
     private readonly userService: UserService,
-    private readonly authService: AuthService,
-  ) {}
+    private readonly queueService: QueueService,
+  ) { }
 
   @Get('profile')
   @ApiOperation({ summary: 'Get profile' })
@@ -55,9 +65,9 @@ export class UserController {
     if (!token) {
       throw new UnauthorizedException('Invalid token')
     }
-    const c = await this.authService.verifyToken(token)
+    const c = await this.userService.verifyToken(token)
     if (c) {
-      const user = await this.authService.getOrCreateUserByUid(c)
+      const user = await this.userService.getOrCreateUserByUid(c)
       return ResponseSuccess(res, null, user)
     }
     throw new NotFoundException('User Firebase not found')
@@ -105,5 +115,35 @@ export class UserController {
     const { deviceId } = updateDeviceIdDto
     await this.userService.updateDeviceId(user, deviceId)
     return ResponseSuccess(res, 'Device id updated successfully', null)
+  }
+
+  @Get('test-cache')
+  // @CacheKey('test')
+  // @CacheTTL(300000)
+  @ApiOperation({ summary: 'Test cache' })
+  async testCache() {
+    const data = await this.userService.testCache()
+  }
+
+  @Get('users')
+  // @UseGuards(FirebaseAuthGuard)
+  // @CheckAbilities(Action.Manage, User)
+  // @ApiPaginationQuery(USER_PAGINATION_CONFIG)
+  @ApiOperation({ summary: 'Get users' })
+  async getUsers(
+    @Query() query: PaginateQuery,
+    @Res() res: FastifyReply,
+  ) {
+    const queryAddPath = { ...query, path: `${SERVER_CONFIG.API_PREFIX_V1}/user/users`}
+    const data = await this.userService.getUsers(queryAddPath)
+    return res.send(data)
+  }
+
+  @Get('users/:id')
+  // @UseGuards(FirebaseAuthGuard, AbilitiesGuard)
+  // @CheckAbilities(Action.Read, User)
+  async getUserById(@Param('id') id: string, @Res() res: FastifyReply) {
+    const user = await this.userService.getUserById(id)
+    return ResponseSuccess(res, null, user)
   }
 }

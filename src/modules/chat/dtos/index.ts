@@ -1,0 +1,5 @@
+export { CreateMessageDto } from './message/create-message.dto'
+export { DeleteMessageDto } from './message/delete-message.dto'
+export { FilterMessageDto } from './message/filter-message.dto'
+export { MessageDto } from './message/message.dto'
+export { UpdateMessageDto } from './message/update-message.dto'

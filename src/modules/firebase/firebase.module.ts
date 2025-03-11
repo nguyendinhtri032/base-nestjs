@@ -1,6 +1,7 @@
 import { Module, Global } from '@nestjs/common'
 import * as admin from 'firebase-admin'
 import path from 'path'
+import { FirebaseService } from './firebase.service'
 
 @Global()
 @Module({
@@ -13,6 +14,7 @@ import path from 'path'
         })
       },
     },
+    FirebaseService
   ],
   exports: ['FIREBASE_APP'],
   

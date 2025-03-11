@@ -46,6 +46,6 @@ RUN dos2unix /usr/local/bin/start-container
 
 RUN chmod +x /usr/local/bin/start-container
 
-EXPOSE 3000
+EXPOSE 8080
 
 ENTRYPOINT ["start-container"]

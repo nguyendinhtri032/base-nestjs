@@ -13,6 +13,7 @@ import { RedisModule } from './modules/redis/redis.module'
 import { EventEmitterModule } from '@nestjs/event-emitter'
 import { CaslModule } from './modules/casl/casl.module'
 import { S3ManagerModule } from './modules/aws/s3-manager.module'
+import { AgencyModule } from './modules/agency/agency.module'
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -30,7 +31,7 @@ import { S3ManagerModule } from './modules/aws/s3-manager.module'
     QueueModule,
     RedisModule,
     CaslModule,
-
+    AgencyModule,
     S3ManagerModule
   ],
   controllers: [AppController],

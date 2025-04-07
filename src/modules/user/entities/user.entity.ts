@@ -1,8 +1,9 @@
-import { Column, Entity, Index, JoinColumn, OneToMany } from 'typeorm'
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm'
 import { BaseEntity } from 'src/common/entities/base.entity'
 import { Role } from 'src/enums/role'
+import { Agency } from 'src/modules/agency/entities/ageny.entity'
 @Entity({ name: 'users' })
-@Index('fullName_fulltext_index', ['fullName'], { fulltext: true })
+// @Index('fullName_fulltext_index', ['fullName'], { fulltext: true })
 export class User extends BaseEntity {
 
   @Column({ nullable: true })
@@ -27,9 +28,9 @@ export class User extends BaseEntity {
   role: Role
 
   @Column({ nullable: true })
-  manageBy: string
+  agencyId: string
 
-  @OneToMany(() => User, (user) => user.manageBy)
-  @JoinColumn({ name: 'manageBy', referencedColumnName: 'id' })
-  manager: User
+  @ManyToOne(() => Agency, (agency) => agency.users, { nullable: true })
+  @JoinColumn({ name: 'agencyId', referencedColumnName: 'id' })
+  agency: Agency
 }

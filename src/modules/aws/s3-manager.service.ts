@@ -1,62 +1,44 @@
 import { Injectable } from '@nestjs/common'
-import { InjectAwsService } from 'nest-aws-sdk'
-import { S3 } from 'aws-sdk'
+import {
+  DeleteObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3'
 import { SERVER_CONFIG } from 'src/configs/server.config'
 import { MemoryStorageFile } from '@blazity/nest-file-fastify'
+import { AwsConfig } from 'src/configs/aws.config'
 
 @Injectable()
 export class S3ManagerService {
-    private readonly bucket = SERVER_CONFIG.AWS.BUCKET
-    constructor(@InjectAwsService(S3) private readonly s3: S3) { }
+  private readonly bucket = SERVER_CONFIG.AWS.BUCKET
+  private readonly s3 = new S3Client(AwsConfig)
 
-    async listBucketContents() {
-        const response = await this.s3.listObjectsV2({ Bucket: this.bucket }).promise()
-        return response.Contents.map(c => c.Key)
-    }
+  async uploadFile(key: string, file: MemoryStorageFile) {
+    const contentType = file.mimetype
+    const fileExtension = contentType.split('/')[1]
+    const fileName = `${key}/${Date.now()}.${fileExtension}`
+    console.log(SERVER_CONFIG.AWS.ACCESS_KEY_ID)
+    await this.s3.send(
+      new PutObjectCommand({
+        Bucket: this.bucket,
+        Key: fileName,
+        Body: file.buffer,
+        ContentType: contentType,
+      }),
+    )
+    return this.getFileUrl(fileName)
+  }
 
-    async uploadFile(key: string, file: MemoryStorageFile) {
-        const contentType = file.mimetype
-        const fileExtension = contentType.split('/')[1]
-        const fileName = `${key}/${Date.now()}.${fileExtension}`
-        const response = await this.s3.upload({ Bucket: this.bucket, Key: fileName, Body: file.buffer, ContentType: contentType }).promise()
-        return response.Location
-    }
+  async getFileUrl(fileName: string) {
+    return `https://${this.bucket}.s3.${SERVER_CONFIG.AWS.REGION}.amazonaws.com/${fileName}`
+  }
 
-    async downloadFile(key: string) {
-        const response = await this.s3.getObject({ Bucket: this.bucket, Key: key }).promise()
-        return response.Body
-    }
-
-    async deleteFile(key: string) {
-        await this.s3.deleteObject({ Bucket: this.bucket, Key: key }).promise()
-    }
-
-    async getFileUrl(key: string) {
-        return `https://${this.bucket}.s3.${SERVER_CONFIG.AWS.REGION}.amazonaws.com/${key}`
-    }
-
-    async getFileMetadata(key: string) {
-        const response = await this.s3.headObject({ Bucket: this.bucket, Key: key }).promise()
-        return response
-    }
-
-    async getFileSize(key: string) {
-        const response = await this.s3.headObject({ Bucket: this.bucket, Key: key }).promise()
-        return response.ContentLength
-    }
-
-    async getFileLastModified(key: string) {
-        const response = await this.s3.headObject({ Bucket: this.bucket, Key: key }).promise()
-        return response.LastModified
-    }
-
-    async getFileContentType(key: string) {
-        const response = await this.s3.headObject({ Bucket: this.bucket, Key: key }).promise()
-        return response.ContentType
-    }
-
-    async getFileETag(key: string) {
-        const response = await this.s3.headObject({ Bucket: this.bucket, Key: key }).promise()
-        return response.ETag
-    }
+  async deleteFile(fileName: string) {
+    await this.s3.send(
+      new DeleteObjectCommand({
+        Bucket: this.bucket,
+        Key: fileName,
+      }),
+    )
+  }
 }
